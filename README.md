@@ -1,8 +1,9 @@
 # ⚡ NexusWorker (`nexus-worker`)
 
+[![PyPI](https://img.shields.io/pypi/v/nexus-worker.svg)](https://pypi.org/project/nexus-worker/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Decentralized AI](https://img.shields.io/badge/Mesh-Decentralized%20Inference-teal.svg)](https://nexuscompute.ai)
+[![Decentralized AI](https://img.shields.io/badge/Network-NexusCompute%20Edge-teal.svg)](https://nexus-compute.pages.dev)
 
 **NexusWorker** is the open-source provider daemon for the **NexusCompute** decentralized AI inference network.
 
@@ -14,7 +15,7 @@ Run this lightweight daemon on your PC, mining rig, or server to monetize your i
 
 NexusWorker was designed from the ground up for strict security:
 
-* **Zero Inbound Ports**: The daemon initiates an **outbound-only** encrypted WebSocket connection to the NexusCompute coordinator. You **never** need to configure port forwarding, open firewall rules, or expose a public IP.
+* **Zero Inbound Ports**: The daemon initiates an **outbound-only** connection to the NexusCompute coordinator. You **never** need to configure port forwarding, open firewall rules, or expose a public IP.
 * **Completely Sandboxed**: The worker only communicates with your local inference engine (e.g. Ollama or vLLM) over localhost (`127.0.0.1`).
 * **100% Open Source**: Full transparency—inspect every line of code before running.
 
@@ -33,7 +34,13 @@ NexusWorker was designed from the ground up for strict security:
 
 ### 2. Installation
 
-Clone and install in a Python virtual environment:
+#### Option A: 1-Line Quick Setup (Recommended via PyPI)
+
+```bash
+pip install nexus-worker
+```
+
+#### Option B: From Source (Developers)
 
 ```bash
 git clone https://github.com/nexus-compute-ai/nexus-worker.git
@@ -46,7 +53,7 @@ python -m venv .venv
 # On Linux/macOS:
 source .venv/bin/activate
 
-# Install package
+# Install package in editable mode
 pip install -e .
 ```
 
@@ -87,8 +94,9 @@ nexus-worker start --token nx-node-YOUR_TOKEN_HERE
 
 #### CLI Options:
 * `--token TEXT`: Your unique node authorization token *(required)*.
-* `--coordinator TEXT`: Coordinator WebSocket URL (default: `ws://127.0.0.1:8000/api/v1/ws/worker`).
-* `--engine [auto|ollama|vllm|emulate]`: Local inference engine (default: `auto`).
+* `--coordinator TEXT`: Coordinator Edge URL (default: `https://nexus-compute.pages.dev`).
+* `--ollama-url TEXT`: Local Ollama HTTP endpoint (default: `http://localhost:11434`).
+* `--vllm-url TEXT`: Local vLLM HTTP endpoint (default: `http://localhost:8000`).
 * `--emulate`: Run in emulation mode for development without downloading weights.
 
 ```bash
