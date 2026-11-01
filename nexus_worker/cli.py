@@ -59,18 +59,18 @@ def info():
 
 @cli.command()
 @click.option("--token", "-t", required=True, help="Provider node authentication token (nx-node-...) from dashboard.")
-@click.option("--server", "-s", default="ws://localhost:8000/api/v1/ws/worker", help="NexusCompute Coordinator WebSocket URL.")
+@click.option("--coordinator", "-c", "--server", "-s", default="https://nexus-compute.pages.dev", help="NexusCompute Coordinator URL (e.g. https://nexus-compute.pages.dev).")
 @click.option("--ollama-url", default="http://localhost:11434", help="Local Ollama HTTP endpoint.")
 @click.option("--vllm-url", default="http://localhost:8000", help="Local vLLM HTTP endpoint.")
 @click.option("--emulate", is_flag=True, default=False, help="Enable test emulation mode (simulates GPU streaming without Ollama).")
 @click.option("--prompt-price", default=0.20, type=float, help="Custom price per 1M prompt tokens (in credits).")
 @click.option("--completion-price", default=0.40, type=float, help="Custom price per 1M completion tokens (in credits).")
-def start(token, server, ollama_url, vllm_url, emulate, prompt_price, completion_price):
+def start(token, coordinator, ollama_url, vllm_url, emulate, prompt_price, completion_price):
     """Start the provider daemon and connect outbound to the NexusCompute network."""
     console.print(BANNER)
     console.print(Panel(
         f"[bold green]Node Token:[/bold green] {token[:12]}...\n"
-        f"[bold green]Coordinator Target:[/bold green] {server}\n"
+        f"[bold green]Coordinator Target:[/bold green] {coordinator}\n"
         f"[bold green]Pricing Config:[/bold green] ${prompt_price}/M prompt | ${completion_price}/M completion\n"
         f"[bold green]Emulation Mode:[/bold green] {'Active' if emulate else 'Auto-detect'}",
         title="Worker Configuration",
@@ -79,7 +79,7 @@ def start(token, server, ollama_url, vllm_url, emulate, prompt_price, completion
 
     daemon = WorkerDaemon(
         node_token=token,
-        server_ws_url=server,
+        coordinator_url=coordinator,
         ollama_url=ollama_url,
         vllm_url=vllm_url,
         emulate=emulate,
