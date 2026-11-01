@@ -16,7 +16,7 @@ class InferenceEngineClient:
         """Discovers locally installed models across Ollama, vLLM, or emulation."""
         if self.emulate:
             self.active_engine = "emulated"
-            return ["llama3:8b", "mistral:7b", "deepseek-r1:7b"]
+            return ["smollm2:1.7b", "llama3:8b", "mistral:7b", "deepseek-r1:7b"]
 
         # 1. Check if Ollama executable exists on system
         if shutil.which("ollama"):
@@ -35,7 +35,7 @@ class InferenceEngineClient:
 
         # 2. Fallback to Emulated Engine for testing/demo
         self.active_engine = "emulated"
-        return ["llama3:8b", "mistral:7b", "deepseek-r1:7b"]
+        return ["smollm2:1.7b", "llama3:8b", "mistral:7b", "deepseek-r1:7b"]
 
     async def stream_chat(
         self,

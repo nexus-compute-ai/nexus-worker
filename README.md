@@ -37,7 +37,7 @@ Ollama runs natively on Mac, Windows, and Linux:
 1. Download & install from **[ollama.com/download](https://ollama.com/download)**.
 2. Open your terminal and pull an open-source model:
    ```bash
-   ollama run llama3:8b
+   ollama run smollm2:1.7b
    ```
    *(You can also serve `deepseek-r1:7b` or `mistral:7b`)*.
 
