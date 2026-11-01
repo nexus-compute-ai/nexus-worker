@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nexus-worker"
-version = "0.1.0"
-description = "Monetize your GPU by serving open-source AI inference in the NexusCompute decentralized network."
+version = "0.1.1"
+description = "Provider daemon for NexusCompute: Monetize your GPU by serving AI inference."
 readme = "README.md"
 authors = [{ name = "NexusCompute Network", email = "providers@nexuscompute.ai" }]
 license = { text = "MIT" }
@@ -22,6 +22,11 @@ dependencies = [
     "rich>=13.7.0",
 ]
 requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://nexus-compute.pages.dev"
+Repository = "https://github.com/nexus-compute-ai/nexus-worker"
+Documentation = "https://github.com/nexus-compute-ai/nexus-worker#readme"
 
 [project.scripts]
 nexus-worker = "nexus_worker.cli:cli"
