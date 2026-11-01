@@ -44,25 +44,25 @@ class WorkerDaemon:
 
         # 1. Detect hardware
         hw = detect_hardware()
-        print(f"\n[NexusCompute Worker] Detected Hardware: {hw['gpu_name']} ({hw['vram_mb']} MB VRAM)")
+        print(f"\n[NexusCompute Worker] Detected Hardware: {hw['gpu_name']} ({hw['vram_mb']} MB VRAM)", flush=True)
 
         # 2. Discover local models
         models = self.engine.discover_models()
-        print(f"[NexusCompute Worker] Engine: {self.engine.active_engine.upper()} | Serving {len(models)} model(s): {', '.join(models)}")
+        print(f"[NexusCompute Worker] Engine: {self.engine.active_engine.upper()} | Serving {len(models)} model(s): {', '.join(models)}", flush=True)
 
         # 3. Benchmark tokens/sec
-        print("[NexusCompute Worker] Running startup synthetic benchmark probe...")
+        print("[NexusCompute Worker] Running startup synthetic benchmark probe...", flush=True)
         bench_speed = await self.engine.run_benchmark()
-        print(f"[NexusCompute Worker] Benchmark Result: {bench_speed} tokens/second")
+        print(f"[NexusCompute Worker] Benchmark Result: {bench_speed} tokens/second", flush=True)
 
         models_param = ",".join(models) if models else "llama3:8b,deepseek-r1:7b,mistral:7b"
         headers = {
             "Authorization": f"Bearer {self.node_token}",
-            "User-Agent": "NexusWorker/1.0",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 NexusWorker/1.0",
         }
 
-        print(f"[NexusCompute Worker] Connecting to Cloudflare Edge Coordinator: {self.coordinator_url}")
-        print("[NexusCompute Worker] Node is ONLINE and actively polling for AI inference jobs...\n")
+        print(f"[NexusCompute Worker] Connecting to Cloudflare Edge Coordinator: {self.coordinator_url}", flush=True)
+        print("[NexusCompute Worker] Node is ONLINE and actively polling for AI inference jobs...\n", flush=True)
 
         backoff = 2
         async with httpx.AsyncClient(
@@ -93,10 +93,10 @@ class WorkerDaemon:
                             pass
 
                     elif resp.status_code == 401:
-                        print(f"[NexusCompute Worker] [ERROR] Authentication failed! Invalid node token: {self.node_token[:12]}...")
+                        print(f"[NexusCompute Worker] [ERROR] Authentication failed! Invalid node token: {self.node_token[:12]}...", flush=True)
                         await asyncio.sleep(10)
                     else:
-                        print(f"[NexusCompute Worker] Polling returned status {resp.status_code}. Retrying...")
+                        print(f"[NexusCompute Worker] Polling returned status {resp.status_code}. Retrying...", flush=True)
                         await asyncio.sleep(backoff)
                         backoff = min(20, backoff * 1.5)
 
@@ -104,11 +104,11 @@ class WorkerDaemon:
                     # Standard long-poll expiration, loop immediately
                     continue
                 except httpx.RequestError as e:
-                    print(f"[NexusCompute Worker] Connection error ({type(e).__name__}). Reconnecting in {backoff}s...")
+                    print(f"[NexusCompute Worker] Connection error ({type(e).__name__}). Reconnecting in {backoff}s...", flush=True)
                     await asyncio.sleep(backoff)
                     backoff = min(20, backoff * 1.5)
                 except Exception as e:
-                    print(f"[NexusCompute Worker] Unexpected error: {e}")
+                    print(f"[NexusCompute Worker] Unexpected error: {e}", flush=True)
                     await asyncio.sleep(backoff)
 
     async def _process_job(self, client: httpx.AsyncClient, job_data: dict):
@@ -118,7 +118,7 @@ class WorkerDaemon:
         temperature = job_data.get("temperature", 0.7)
         max_tokens = job_data.get("max_tokens", 512)
 
-        print(f"\n[NexusCompute Worker] >> [CLAIMED] Job {job_id[:8]} for model '{model}'")
+        print(f"\n[NexusCompute Worker] >> [CLAIMED] Job {job_id[:8]} for model '{model}'", flush=True)
         start_time = time.time()
         seq = 0
         prompt_tokens = 15
@@ -156,10 +156,10 @@ class WorkerDaemon:
                 "completion_tokens": completion_tokens,
                 "latency_ms": latency_ms,
             })
-            print(f"[NexusCompute Worker] << [COMPLETED] Job {job_id[:8]} in {latency_ms}ms ({completion_tokens} tokens streamed, payout recorded)!\n")
+            print(f"[NexusCompute Worker] << [COMPLETED] Job {job_id[:8]} in {latency_ms}ms ({completion_tokens} tokens streamed, payout recorded)!\n", flush=True)
 
         except Exception as e:
-            print(f"[NexusCompute Worker] !! [ERROR] Job {job_id[:8]} failed: {e}")
+            print(f"[NexusCompute Worker] !! [ERROR] Job {job_id[:8]} failed: {e}", flush=True)
             try:
                 await client.post(f"{self.coordinator_url}/api/v1/jobs/{job_id}/stream", json={
                     "seq": seq + 1,
