@@ -7,7 +7,7 @@
 
 **NexusWorker** is the open-source provider daemon for the **NexusCompute** decentralized AI inference network.
 
-Run this lightweight daemon on your PC, mining rig, or server to monetize your idle graphics cards (NVIDIA, AMD, Apple Silicon) by serving inference tokens for open-source LLMs (Llama 3, DeepSeek-R1, Mistral).
+Run this lightweight daemon on your laptop (Apple Silicon MacBook, Windows RTX laptop, or Linux notebook), homelab rig, or cloud GPU server to monetize your idle graphics cards and compute power by serving inference tokens for open-source LLMs (Llama 3, DeepSeek-R1, Mistral, Qwen).
 
 ---
 
@@ -21,48 +21,35 @@ NexusWorker was designed from the ground up for strict security:
 
 ---
 
-## 🚀 Quickstart
+## 🚀 Laptop & Desktop Quickstart Guide
 
 ### 1. Requirements
 
-* **OS**: Linux, Windows, or macOS
+* **OS**: macOS (Apple Silicon M1/M2/M3/M4 or Intel), Windows 10/11, or Linux
 * **Python**: 3.9 or higher
-* **Inference Engine**: [Ollama](https://ollama.ai) (recommended for 1-click setup) or [vLLM](https://github.com/vllm-project/vllm).
-* **Hardware**: Any modern GPU with 6GB+ VRAM (e.g. RTX 3060/3080/4090, Apple M-series), or CPU in emulation mode.
+* **Inference Engine**: [Ollama](https://ollama.ai) (recommended for 1-click local setup) or [vLLM](https://github.com/vllm-project/vllm).
+* **Hardware**: Any modern GPU (NVIDIA RTX 3060/3080/4090, Apple Silicon unified memory), or CPU with emulation support.
 
 ---
 
-### 2. Installation
+### 2. Step-by-Step Setup
 
-#### Option A: 1-Line Quick Setup (Recommended via PyPI)
+#### Step 1: Install Ollama & Pull a Model
+Ollama runs natively on Mac, Windows, and Linux:
+1. Download & install from **[ollama.com/download](https://ollama.com/download)**.
+2. Open your terminal and pull an open-source model:
+   ```bash
+   ollama run llama3:8b
+   ```
+   *(You can also use `deepseek-r1:7b` or `mistral:7b`)*.
 
+#### Step 2: Install NexusWorker from PyPI
+Install the official provider daemon using pip:
 ```bash
 pip install nexus-worker
 ```
 
-#### Option B: From Source (Developers)
-
-```bash
-git clone https://github.com/nexus-compute-ai/nexus-worker.git
-cd nexus-worker
-
-# Create and activate virtual environment
-python -m venv .venv
-# On Windows:
-.\.venv\Scripts\activate
-# On Linux/macOS:
-source .venv/bin/activate
-
-# Install package in editable mode
-pip install -e .
-```
-
----
-
-### 3. Check Detected Hardware
-
-Verify that your GPU and local models are recognized:
-
+Verify your hardware and local model detection:
 ```bash
 nexus-worker info
 ```
@@ -72,48 +59,66 @@ Example output:
 ============================================================
               NEXUSCOMPUTE HARDWARE DETECTOR                
 ============================================================
-• GPU: NVIDIA GeForce RTX 4090
-• VRAM: 24,576 MB
+• GPU: Apple M3 Max / NVIDIA GeForce RTX 4090
+• VRAM: 36,864 MB
 • Backend Engine: Ollama (http://127.0.0.1:11434)
 • Discovered Models:
     - llama3:8b
     - deepseek-r1:7b
-    - mistral:7b
 ============================================================
 ```
 
----
+#### Step 3: Register Your Node on the Dashboard
+1. Go to **[nexus-compute.pages.dev](https://nexus-compute.pages.dev)**.
+2. Sign in and open the **Provider Node** tab.
+3. Type a name for your machine (e.g., `MacBook-Pro-M3` or `Alienware-RTX4080`) and click **Add Node**.
+4. Copy your node token (`nx-node-...`).
 
-### 4. Connect to Network & Earn
-
-Get your node token from the **Provider Dashboard** on NexusCompute, then start the daemon:
-
+#### Step 4: Connect & Start Earning
+Start the worker daemon:
 ```bash
 nexus-worker start --token nx-node-YOUR_TOKEN_HERE
 ```
 
-#### CLI Options:
-* `--token TEXT`: Your unique node authorization token *(required)*.
-* `--coordinator TEXT`: Coordinator Edge URL (default: `https://nexus-compute.pages.dev`).
-* `--ollama-url TEXT`: Local Ollama HTTP endpoint (default: `http://localhost:11434`).
-* `--vllm-url TEXT`: Local vLLM HTTP endpoint (default: `http://localhost:8000`).
-* `--emulate`: Run in emulation mode for development without downloading weights.
-
-```bash
-# Example with custom coordinator and auto-discovery
-nexus-worker start --token nx-node-0a0a3b29ed4e323af354549a6681821a1b75157e
-```
+That's it! Your laptop is now connected to the decentralized inference mesh:
+* The node will automatically appear **online** in your dashboard.
+* When consumers run queries on your served model, your node streams tokens and 90% of token fees are automatically credited to your wallet in real time.
 
 ---
 
-## 🛠️ Supported Engines
+## 💡 Testing Without Downloading Large Models (Emulation Mode)
 
-1. **Ollama (Recommended)**: Pull models via `ollama pull llama3:8b`. NexusWorker will auto-detect active models and advertise them to the coordinator.
-2. **vLLM (High-Throughput)**: Launch with OpenAI-compatible API (`--port 8000`).
-3. **Emulation Engine**: Built-in mock tokenizer and streaming generator for rapid testing.
+If you want to test connecting your node immediately before downloading gigabytes of model weights, run with the `--emulate` flag:
+
+```bash
+nexus-worker start --token nx-node-YOUR_TOKEN_HERE --emulate
+```
+
+The daemon will simulate high-performance streaming token output (~45 tok/s), allowing you to verify coordinator connectivity, heartbeat telemetry, and testnet payouts right away.
+
+---
+
+## 🛠️ CLI Reference
+
+```bash
+nexus-worker [OPTIONS] COMMAND [ARGS]...
+
+Commands:
+  info   Display local GPU hardware specifications and discovered AI engines.
+  start  Start the provider daemon and connect outbound to the NexusCompute network.
+```
+
+### Options for `nexus-worker start`:
+* `--token, -t TEXT`: Provider node token from dashboard *(required)*.
+* `--coordinator, -c TEXT`: Coordinator URL (default: `https://nexus-compute.pages.dev`).
+* `--ollama-url TEXT`: Local Ollama HTTP endpoint (default: `http://localhost:11434`).
+* `--vllm-url TEXT`: Local vLLM HTTP endpoint (default: `http://localhost:8000`).
+* `--emulate`: Run in emulation mode (simulates GPU streaming).
+* `--prompt-price FLOAT`: Custom price per 1M prompt tokens in credits (default: `0.20`).
+* `--completion-price FLOAT`: Custom price per 1M completion tokens in credits (default: `0.40`).
 
 ---
 
 ## 📄 License
 
-Distributed under the **MIT License**. See [LICENSE](LICENSE) for more information.
+Distributed under the **MIT License**.
