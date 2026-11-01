@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nexus-worker"
+version = "0.1.0"
+description = "Monetize your GPU by serving open-source AI inference in the NexusCompute decentralized network."
+readme = "README.md"
+authors = [{ name = "NexusCompute Network", email = "providers@nexuscompute.ai" }]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "httpx>=0.27.0",
+    "websockets>=12.0",
+    "click>=8.1.7",
+    "rich>=13.7.0",
+]
+requires-python = ">=3.9"
+
+[project.scripts]
+nexus-worker = "nexus_worker.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nexus_worker*"]
