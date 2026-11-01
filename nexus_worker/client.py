@@ -123,6 +123,7 @@ class WorkerDaemon:
         seq = 0
         prompt_tokens = 15
         completion_tokens = 0
+        full_text_chunks = []
 
         try:
             async for chunk in self.engine.stream_chat(
@@ -135,6 +136,7 @@ class WorkerDaemon:
                     seq += 1
                     completion_tokens += 1
                     delta = chunk["delta"]
+                    full_text_chunks.append(delta)
 
                     # POST chunk to Cloudflare Edge
                     stream_url = f"{self.coordinator_url}/api/v1/jobs/{job_id}/stream"
@@ -149,12 +151,14 @@ class WorkerDaemon:
                     break
 
             latency_ms = int((time.time() - start_time) * 1000)
+            full_response = "".join(full_text_chunks)
             # Settle completion
             complete_url = f"{self.coordinator_url}/api/v1/jobs/{job_id}/complete"
             await client.post(complete_url, json={
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": completion_tokens,
                 "latency_ms": latency_ms,
+                "response_payload": full_response,
             })
             print(f"[NexusCompute Worker] << [COMPLETED] Job {job_id[:8]} in {latency_ms}ms ({completion_tokens} tokens streamed, payout recorded)!\n", flush=True)
 
