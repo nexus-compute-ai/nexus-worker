@@ -124,6 +124,24 @@ class WorkerDaemon:
         prompt_tokens = 15
         completion_tokens = 0
         full_text_chunks = []
+        buffer = []
+        last_flush_time = time.time()
+        FLUSH_INTERVAL = 0.12  # flush at least every 120ms
+        MAX_BUFFER_CHARS = 25   # or if buffer exceeds 25 chars
+
+        async def flush_buffer():
+            nonlocal seq, buffer, last_flush_time
+            if not buffer:
+                return
+            combined_delta = "".join(buffer)
+            buffer = []
+            last_flush_time = time.time()
+            seq += 1
+            stream_url = f"{self.coordinator_url}/api/v1/jobs/{job_id}/stream"
+            try:
+                await client.post(stream_url, json={"seq": seq, "delta": combined_delta})
+            except Exception as ex:
+                logger.warning(f"Failed to post chunk {seq}: {ex}")
 
         try:
             async for chunk in self.engine.stream_chat(
@@ -133,22 +151,22 @@ class WorkerDaemon:
                 max_tokens=max_tokens
             ):
                 if chunk["type"] == "chunk":
-                    seq += 1
                     completion_tokens += 1
                     delta = chunk["delta"]
                     full_text_chunks.append(delta)
+                    buffer.append(delta)
 
-                    # POST chunk to Cloudflare Edge
-                    stream_url = f"{self.coordinator_url}/api/v1/jobs/{job_id}/stream"
-                    try:
-                        await client.post(stream_url, json={"seq": seq, "delta": delta})
-                    except Exception as ex:
-                        logger.warning(f"Failed to post chunk {seq}: {ex}")
+                    current_len = sum(len(c) for c in buffer)
+                    if current_len >= MAX_BUFFER_CHARS or (time.time() - last_flush_time) >= FLUSH_INTERVAL:
+                        await flush_buffer()
 
                 elif chunk["type"] == "done":
                     prompt_tokens = chunk.get("prompt_tokens", 15)
                     completion_tokens = chunk.get("completion_tokens", completion_tokens)
                     break
+
+            # Flush any remaining buffer before completing
+            await flush_buffer()
 
             latency_ms = int((time.time() - start_time) * 1000)
             full_response = "".join(full_text_chunks)
