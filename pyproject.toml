@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nexus-worker"
-version = "0.1.1"
+version = "0.1.2"
 description = "Provider daemon for NexusCompute: Monetize your GPU by serving AI inference."
 readme = "README.md"
 authors = [{ name = "NexusCompute Network", email = "providers@nexuscompute.ai" }]
